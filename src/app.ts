@@ -1,4 +1,5 @@
 import express, { json, Request, Response, NextFunction } from 'express'
+import 'dotenv/config'
 
 import githubRoutes from './routes/github'
 
