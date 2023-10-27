@@ -4,6 +4,6 @@ import { getGitHubAccessToken } from '../controllers/github'
 
 const router = Router()
 
-router.get('/get-access-token', getGitHubAccessToken)
+router.post('/get-access-token', getGitHubAccessToken)
 
 export default router

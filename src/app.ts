@@ -1,9 +1,12 @@
 import express, { json, Request, Response, NextFunction } from 'express'
+import cors from 'cors'
 import 'dotenv/config'
 
 import githubRoutes from './routes/github'
 
 const app = express()
+
+app.use(cors())
 
 app.use(json())
 
