@@ -1,10 +1,10 @@
-import express, { Request, Response, NextFunction } from 'express'
+import express, { json, Request, Response, NextFunction } from 'express'
 
 import githubRoutes from './routes/github'
 
 const app = express()
 
-app.use(express.json())
+app.use(json())
 
 app.use('/github', githubRoutes)
 
