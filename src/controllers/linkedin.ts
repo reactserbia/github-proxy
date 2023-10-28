@@ -12,7 +12,7 @@ export const getLinkedInAccessToken: RequestHandler = (req, res, next) => {
                 code,
                 client_id: process.env.LINKEDIN_CLIENT_ID,
                 client_secret: process.env.LINKEDIN_CLIENT_SECRET,
-                redirect_uri: 'http://localhost:5173/'
+                redirect_uri: 'http://localhost:5173/app/login/linkedin'
             },
             {
                 headers: {
@@ -24,6 +24,26 @@ export const getLinkedInAccessToken: RequestHandler = (req, res, next) => {
             res.status(200).json({ response: response.data })
         })
         .catch(err => {
+            next(err)
+        })
+}
+
+export const getLinkedInProfileData: RequestHandler = (req, res, next) => {
+    const accessToken = req.headers.authorization
+
+    console.log('Access Token: ', accessToken)
+
+    axios
+        .get('https://api.linkedin.com/v2/userinfo', {
+            headers: {
+                Authorization: accessToken
+            }
+        })
+        .then(response => {
+            res.status(200).json({ response: response.data })
+        })
+        .catch(err => {
+            console.log(err)
             next(err)
         })
 }
