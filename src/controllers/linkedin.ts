@@ -31,8 +31,6 @@ export const getLinkedInAccessToken: RequestHandler = (req, res, next) => {
 export const getLinkedInProfileData: RequestHandler = (req, res, next) => {
     const accessToken = req.headers.authorization
 
-    console.log('Access Token: ', accessToken)
-
     axios
         .get('https://api.linkedin.com/v2/userinfo', {
             headers: {
@@ -43,7 +41,6 @@ export const getLinkedInProfileData: RequestHandler = (req, res, next) => {
             res.status(200).json({ response: response.data })
         })
         .catch(err => {
-            console.log(err)
             next(err)
         })
 }
