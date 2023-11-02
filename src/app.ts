@@ -5,6 +5,7 @@ import 'dotenv/config'
 import githubRoutes from './routes/github'
 import linkedinRoutes from './routes/linkedin'
 import aiRoutes from './routes/openai'
+import testingGitHub from './routes/testing-github'
 
 const app = express()
 
@@ -15,6 +16,7 @@ app.use(json())
 app.use('/github', githubRoutes)
 app.use('/linkedin', linkedinRoutes)
 app.use('/ai', aiRoutes)
+app.use('/testing-github', testingGitHub)
 
 app.use((_, res) => res.status(404).json({ message: 'Invalid Request' }))
 
