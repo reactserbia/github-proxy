@@ -14,6 +14,6 @@ router.get('/user', getLoggedInUser)
 router.get('/users/:username', getUserByUsername)
 router.get('/repos/:owner/:repo', getRepository)
 router.post('/repos/:owner/:repo/forks', forkRepository)
-router.get('/repos/:owner/:repo/contents', deleteFilesInRepository)
+router.delete('/repos/:owner/:repo/contents', deleteFilesInRepository)
 
 export default router
