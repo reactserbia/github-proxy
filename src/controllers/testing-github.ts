@@ -44,3 +44,18 @@ export const getRepository: RequestHandler = (req, res, next) => {
             next(err)
         })
 }
+
+export const forkRepository: RequestHandler = (req, res, next) => {
+    const { owner, repo } = req.params
+
+    octokit
+        .request(`POST /repos/${owner}/${repo}/forks`)
+        .then(response => {
+            console.log(response)
+            res.status(200).json({ data: response.data })
+        })
+        .catch(err => {
+            console.log(err)
+            next(err)
+        })
+}
