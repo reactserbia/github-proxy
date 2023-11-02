@@ -55,7 +55,7 @@ export const forkRepository: RequestHandler = (req, res, next) => {
 export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
     const { owner, repo } = req.params
 
-    const deleteFiles = (path = '') =>
+    const deleteFiles: any = (path = '') =>
         octokit.repos
             .getContent({ owner, repo, path })
             .then(({ data }) => {
@@ -83,7 +83,7 @@ export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
         .then(() => {
             res.status(200).json({ data: 'Data deleted.' })
         })
-        .catch(err => {
+        .catch((err: Error) => {
             next(err)
         })
 }
