@@ -55,23 +55,31 @@ export const forkRepository: RequestHandler = (req, res, next) => {
 export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
     const { owner, repo } = req.params
 
-    octokit
-        .request(`GET /repos/${owner}/${repo}/contents`)
-        .then(({ data }) => {
-            if (Array.isArray(data)) {
-                data.forEach(file => {
-                    octokit.repos
-                        .deleteFile({
-                            owner,
-                            repo,
-                            path: file.path,
-                            message: 'delete file',
-                            sha: file.sha
+    const deleteFiles = (path = '') =>
+        octokit.repos
+            .getContent({ owner, repo, path })
+            .then(({ data }) => {
+                if (Array.isArray(data)) {
+                    return Promise.all(
+                        data.map(file => {
+                            if (file.type === 'dir') {
+                                return deleteFiles(file.path)
+                            } else {
+                                return octokit.repos.deleteFile({
+                                    owner,
+                                    repo,
+                                    path: file.path,
+                                    message: 'delete file',
+                                    sha: file.sha
+                                })
+                            }
                         })
-                        .catch(err => console.error(err))
-                })
-            }
-        })
+                    )
+                }
+            })
+            .catch(err => console.error(err))
+
+    deleteFiles()
         .then(() => {
             res.status(200).json({ data: 'Data deleted.' })
         })
