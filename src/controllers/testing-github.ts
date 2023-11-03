@@ -87,18 +87,54 @@ export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
         })
 }
 
-export const updateReadme: RequestHandler = (req, res, next) => {
+export const updateReadme: RequestHandler = async (req, res, next) => {
     const { owner } = req.params
 
-    octokit
-        .request(`GET /repos/${owner}/${owner}`)
-        .then(() => {
-            res.status(200).json({ data: 'Repository exists!' })
-        })
-        .catch(error => {
-            console.log('ERROR:', error)
-            return res.status(404).json({ data: "Repository doesn't exist!" })
-        })
+    console.log('Checking if repository exists...')
 
-    console.log('HERE I AM')
+    try {
+        octokit.request(`GET /repos/${owner}/${owner}`)
+    } catch (error) {
+        return res.status(404).json({ data: "Repository doesn't exist!" })
+    }
+
+    console.log('Checking if fork exists...')
+
+    let isForkedAlready = false
+
+    try {
+        await octokit.request(`GET /repos/bejzik8/${owner}`)
+
+        isForkedAlready = true
+    } catch (error) {}
+
+    console.log(`Fork ${isForkedAlready ? 'exists' : "doesn't exist"}...`)
+
+    if (isForkedAlready) {
+        try {
+            console.log('Deleting the fork...')
+            await octokit.request(`DELETE /repos/bejzik8/${owner}`)
+            console.log('The fork deleted...')
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    console.log('Forking the repository...')
+
+    // FORK THE REPOSITORY
+
+    // CLONE THE REPOSITORY
+
+    // MAKE CHANGES
+
+    // COMMIT CHANGES
+
+    // PUSH CHANGES
+
+    // CREATE PULL REQUEST
+
+    // DELETE LOCAL REPOSITORY
+
+    res.status(200).json({ data: `Repo forked already: ${isForkedAlready}` })
 }
