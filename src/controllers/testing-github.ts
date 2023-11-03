@@ -5,6 +5,8 @@ import * as path from 'path'
 
 import { octokit } from '../api'
 
+const git = simpleGit()
+
 export const getLoggedInUser: RequestHandler = (_, res, next) => {
     octokit
         .request('GET /user')
@@ -55,8 +57,6 @@ export const forkRepository: RequestHandler = (req, res, next) => {
         })
 }
 
-const git = simpleGit()
-
 export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
     const { owner, repo } = req.params
 
@@ -85,4 +85,20 @@ export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
         .catch((err: Error) => {
             next(err)
         })
+}
+
+export const updateReadme: RequestHandler = (req, res, next) => {
+    const { owner } = req.params
+
+    octokit
+        .request(`GET /repos/${owner}/${owner}`)
+        .then(() => {
+            res.status(200).json({ data: 'Repository exists!' })
+        })
+        .catch(error => {
+            console.log('ERROR:', error)
+            return res.status(404).json({ data: "Repository doesn't exist!" })
+        })
+
+    console.log('HERE I AM')
 }

@@ -5,7 +5,8 @@ import {
     getUserByUsername,
     getRepository,
     forkRepository,
-    deleteFilesInRepository
+    deleteFilesInRepository,
+    updateReadme
 } from '../controllers/testing-github'
 
 const router = Router()
@@ -15,5 +16,6 @@ router.get('/users/:username', getUserByUsername)
 router.get('/repos/:owner/:repo', getRepository)
 router.post('/repos/:owner/:repo/forks', forkRepository)
 router.delete('/repos/:owner/:repo/contents', deleteFilesInRepository)
+router.post('/update-readme/:owner', updateReadme)
 
 export default router
