@@ -2,6 +2,7 @@ import { RequestHandler } from 'express'
 import { simpleGit } from 'simple-git'
 import * as fs from 'fs'
 import * as path from 'path'
+import { setTimeout } from 'timers/promises'
 
 import { octokit } from '../api'
 
@@ -90,9 +91,9 @@ export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
 export const updateReadme: RequestHandler = async (req, res, next) => {
     const { owner } = req.params
 
-    console.log('Checking if the repository exists...')
-
     try {
+        console.log('Checking if the repository exists...')
+
         octokit.request(`GET /repos/${owner}/${owner}`)
     } catch (error) {
         return res.status(404).json({ data: "Repository doesn't exist!" })
@@ -100,11 +101,11 @@ export const updateReadme: RequestHandler = async (req, res, next) => {
 
     console.log('The repository exists...')
 
-    console.log('Checking if a fork exists...')
-
     let isForkedAlready = false
 
     try {
+        console.log('Checking if a fork exists...')
+
         await octokit.request(`GET /repos/bejzik8/${owner}`)
 
         isForkedAlready = true
@@ -115,34 +116,40 @@ export const updateReadme: RequestHandler = async (req, res, next) => {
     if (isForkedAlready) {
         try {
             console.log('Deleting the fork...')
+
             await octokit.request(`DELETE /repos/bejzik8/${owner}`)
+
             console.log('The fork deleted...')
         } catch (error) {
             return next(error)
         }
     }
 
-    console.log('Forking the repository...')
-
     try {
+        console.log('Forking the repository...')
+
         await octokit.request(`POST /repos/${owner}/${owner}/forks`)
+
+        console.log('The repository forked...')
     } catch (error) {
         return next(error)
     }
 
-    console.log('The repository forked...')
-    console.log('Cloning the repository...')
+    await setTimeout(5000)
 
     const repositoryUrl = `https://github.com/bejzik8/${owner}.git`
     const localPath = path.resolve(__dirname, owner)
 
     try {
+        console.log('Cloning the repository...')
+
         await git.clone(repositoryUrl, localPath)
 
         console.log('The repository cloned...')
     } catch (error) {
         return next(error)
     }
+
     console.log('Deleting all files and folders...')
 
     try {
@@ -185,13 +192,35 @@ export const updateReadme: RequestHandler = async (req, res, next) => {
         return next(error)
     }
 
-    // CREATE PULL REQUEST
+    try {
+        console.log('Creating a pull request...')
+
+        await octokit.request(`POST /repos/${owner}/${owner}/pulls`, {
+            owner,
+            repo: owner,
+            title: "Testing GitHub's API...",
+            body: "Don't merge this pull request!",
+            head: 'bejzik8:main',
+            base: 'main',
+            headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+        })
+
+        console.log('The pull request created...')
+    } catch (error) {
+        return next(error)
+    }
+
+    console.log('Deleting the local repository...')
 
     fs.rm(localPath, { recursive: true, force: true }, error => {
         if (error) {
             console.error('Failed to delete directory:', error)
         }
     })
+
+    console.log('The local repository deleted...')
 
     return res
         .status(200)
