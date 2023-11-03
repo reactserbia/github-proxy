@@ -5,8 +5,7 @@
     "main": "dist/app.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon dist/app.js",
-        "build": "tsc -p ."
+        "start": "nodemon dist/app.js"
     },
     "author": "",
     "license": "ISC",
