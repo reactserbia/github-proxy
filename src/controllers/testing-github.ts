@@ -55,49 +55,15 @@ export const forkRepository: RequestHandler = (req, res, next) => {
         })
 }
 
-// export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
-//     const { owner, repo } = req.params
-
-//     const deleteFiles: any = (path = '') =>
-//         octokit.repos
-//             .getContent({ owner, repo, path })
-//             .then(({ data }) => {
-//                 if (Array.isArray(data)) {
-//                     return Promise.all(
-//                         data.map(file => {
-//                             if (file.type === 'dir') {
-//                                 return deleteFiles(file.path)
-//                             } else {
-//                                 return octokit.repos.deleteFile({
-//                                     owner,
-//                                     repo,
-//                                     path: file.path,
-//                                     message: 'delete file',
-//                                     sha: file.sha
-//                                 })
-//                             }
-//                         })
-//                     )
-//                 }
-//             })
-//             .catch(err => console.error(err))
-
-//     deleteFiles()
-//         .then(() => {
-//             res.status(200).json({ data: 'Data deleted.' })
-//         })
-//         .catch((err: Error) => {
-//             next(err)
-//         })
-// }
-
-const repoUrl = 'https://github.com/bejzik8/itmilos.git'
-const localPath = path.resolve(__dirname, 'repo')
-
 const git = simpleGit()
 
 export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
-    git.clone(repoUrl, localPath)
+    const { owner, repo } = req.params
+
+    const repositoryUrl = `https://github.com/${owner}/${repo}.git`
+    const localPath = path.resolve(__dirname, repo)
+
+    git.clone(repositoryUrl, localPath)
         .then(() => git.cwd(localPath))
         .then(() =>
             fs.readdirSync(localPath).forEach(file => {
