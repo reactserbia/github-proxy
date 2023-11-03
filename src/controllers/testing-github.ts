@@ -90,7 +90,7 @@ export const deleteFilesInRepository: RequestHandler = (req, res, next) => {
 export const updateReadme: RequestHandler = async (req, res, next) => {
     const { owner } = req.params
 
-    console.log('Checking if repository exists...')
+    console.log('Checking if the repository exists...')
 
     try {
         octokit.request(`GET /repos/${owner}/${owner}`)
@@ -98,7 +98,9 @@ export const updateReadme: RequestHandler = async (req, res, next) => {
         return res.status(404).json({ data: "Repository doesn't exist!" })
     }
 
-    console.log('Checking if fork exists...')
+    console.log('The repository exists...')
+
+    console.log('Checking if a fork exists...')
 
     let isForkedAlready = false
 
@@ -122,19 +124,76 @@ export const updateReadme: RequestHandler = async (req, res, next) => {
 
     console.log('Forking the repository...')
 
-    // FORK THE REPOSITORY
+    try {
+        await octokit.request(`POST /repos/${owner}/${owner}/forks`)
+    } catch (error) {
+        return next(error)
+    }
 
-    // CLONE THE REPOSITORY
+    console.log('The repository forked...')
+    console.log('Cloning the repository...')
 
-    // MAKE CHANGES
+    const repositoryUrl = `https://github.com/bejzik8/${owner}.git`
+    const localPath = path.resolve(__dirname, owner)
 
-    // COMMIT CHANGES
+    try {
+        await git.clone(repositoryUrl, localPath)
 
-    // PUSH CHANGES
+        console.log('The repository cloned...')
+    } catch (error) {
+        return next(error)
+    }
+    console.log('Deleting all files and folders...')
+
+    try {
+        await git.cwd(localPath)
+
+        await fs.readdirSync(localPath).forEach(file => {
+            if (file !== '.git') {
+                fs.rmSync(path.join(localPath, file), {
+                    recursive: true,
+                    force: true
+                })
+            }
+        })
+
+        await git.add('./*')
+
+        await git.commit('Deleted all files and folders.')
+
+        console.log('All files and folders deleted...')
+
+        console.log('Creating a new README.md file...')
+
+        await fs.writeFileSync(
+            path.join(localPath, 'README.md'),
+            `# ${owner}\n\nThis is a forked repository by Mirko Basic 🍀.`
+        )
+
+        await git.add('./*')
+
+        await git.commit('Created a new README.md file.')
+
+        console.log('The README.md file created...')
+
+        console.log('Pushing changes...')
+
+        await git.push('origin', 'main')
+
+        console.log('Changes pushed...')
+    } catch (error) {
+        return next(error)
+    }
 
     // CREATE PULL REQUEST
 
-    // DELETE LOCAL REPOSITORY
+    fs.rm(localPath, { recursive: true, force: true }, error => {
+        if (error) {
+            console.error('Failed to delete directory:', error)
+        }
+    })
 
-    res.status(200).json({ data: `Repo forked already: ${isForkedAlready}` })
+    return res
+        .status(200)
+        .json({ data: 'The repository successfylly updated! 🍀' })
 }
